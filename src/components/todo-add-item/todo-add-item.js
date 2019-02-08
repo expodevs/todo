@@ -7,21 +7,32 @@ export default class TodoAddItem extends Component {
         titleLabel: ''
     };
 
-    updateInput = (val) => {
+    updateInput = (e) => {
         this.setState({
-            titleLabel: val.target.value
-        })
+            titleLabel: e.target.value
+        });
+    };
 
+    onSubmit = (e) => {
+        e.preventDefault();
+        this.props.onAddItem(this.state.titleLabel);
+        this.setState({
+            titleLabel: ''
+        })
     };
     render() {
-        const {onAddItem} = this.props;
         return (
-            <div className="todo-add-item d-flex">
-                <input type="text" value={this.state.titleLabel} onChange={(val) => this.updateInput(val)} className="form-control add-input" placeholder="Add new task "/>
-                <button
-                    className="btn btn-outline-success"
-                    onClick={() => onAddItem(this.state.titleLabel)}>Add</button>
-            </div>
+            <form
+                className="todo-add-item d-flex"
+                onSubmit={this.onSubmit} >
+                <input
+                    type="text"
+                    onChange={this.updateInput}
+                    className="form-control add-input"
+                    placeholder="Add new task"
+                    value={this.state.titleLabel}/>
+                <button className="btn btn-outline-success">Add</button>
+            </form>
         )
     }
 }
