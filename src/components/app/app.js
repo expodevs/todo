@@ -11,6 +11,8 @@ import './app.css';
 export default class App extends Component {
     maxID = 1;
     state = {
+        term: '',
+        filter: 'all',
         todoData: [
             this.createTodoItem('Drink cofee'),
             this.createTodoItem('Awesome app'),
@@ -80,47 +82,60 @@ export default class App extends Component {
         })
     };
 
-    visibleAll = () => {
-        this.setState(({todoData}) => {
-            console.log(todoData);
-            return {
-                todoData: todoData
-            }
-        })
+    filterItems = (items, filter) => {
+        switch (filter) {
+            case 'all':
+                return items;
+            case 'active':
+                return items.filter((item) => !item.done);
+            case 'done':
+                return items.filter((item) => item.done);
+            case 'important':
+                return items.filter((item) => item.important);
+            default:
+                return items;
+        }
     };
 
-    visibleDone = () => {
-        this.setState(({todoData}) => {
-            const newArr = todoData.filter((item) => {
-                return item.done
-            });
-            console.log(newArr);
-            return {
-                todoData: newArr
-            }
-        })
+    searchText(items, term) {
+        if (term.length === 0) {
+            return items;
+        }
+        return items.filter((item) => {
+            return item.label.indexOf(term) > -1;
+        });
+    };
+
+    searchTextChange = (term) => {
+        this.setState({term});
+    };
+    onSearchChange = (filter) => {
+        this.setState({filter});
     };
 
     render() {
-        const {todoData} = this.state;
+        const {todoData, term, filter} = this.state;
         const doneCount = todoData.filter((el) => el.done).length;
         const todoCount = todoData.length - doneCount;
+        const resultSearch = this.filterItems(
+            this.searchText(todoData, term),
+            filter
+        );
         return (
             <div className="todo-app">
                 <AppHeader toDo={todoCount} done={doneCount}/>
                 <div className="top-panel d-flex">
-                    <SearchPanel/>
+                    <SearchPanel searchText={this.searchTextChange}/>
                     <ItemStatusFilter
-                        visibleDone={this.visibleDone}
-                        visibleAll={this.visibleAll}/>
+                        filter={filter}
+                        onSearchChange={this.onSearchChange}/>
                 </div>
 
                 <TodoList
-                    todos={todoData}
+                    todos={resultSearch}
                     onDeleted={this.onDelete}
                     onToggleImportant={this.onToggleImportant}
-                    onToggleDone={this.onToggleDone}
-                    visibleDone={this.visibleDone}/>
+                    onToggleDone={this.onToggleDone}/>
                 <TodoAddItem onAddItem={this.onAddItem} />
             </div>
         );
